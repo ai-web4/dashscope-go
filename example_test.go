@@ -24,7 +24,7 @@ func ExampleClient_SubmitAndWaitImageToVideo() {
 			LastFrameURL:  "https://example.com/last.png",
 		},
 		Parameters: dashscope.GenerationParameters{
-			Resolution: "720P",
+			Resolution: dashscope.Resolution720P,
 		},
 	})
 	if err != nil {
@@ -46,9 +46,9 @@ func ExampleClient_SubmitAndWaitVideoGeneration_textToVideo() {
 			Prompt: "夕阳下，一只金毛犬在海滩上奔跑",
 		},
 		Parameters: dashscope.GenerationParameters{
-			Size:     "1280*720",
+			Size:     dashscope.Size720P_1280x720,
 			Duration: 5,
-			ShotType: "single",
+			ShotType: dashscope.ShotTypeSingle,
 		},
 	})
 	if err != nil {
@@ -73,9 +73,9 @@ func ExampleClient_SubmitAndWaitVideoGeneration_referenceVideo() {
 			},
 		},
 		Parameters: dashscope.GenerationParameters{
-			Size:     "1280*720",
+			Size:     dashscope.Size720P_1280x720,
 			Duration: 5,
-			ShotType: "single",
+			ShotType: dashscope.ShotTypeSingle,
 		},
 	})
 	if err != nil {
@@ -96,11 +96,11 @@ func ExampleClient_SubmitAndWaitVideoGeneration_vaceRepainting() {
 		Model: "wanx2.1-vace-plus",
 		Input: dashscope.VACEInput{
 			Prompt:   "一位穿红色裙子的女孩在跳舞",
-			Function: "video_repainting",
+			Function: dashscope.VACEFunctionVideoRepainting,
 			VideoURL: "https://example.com/dance.mp4",
 		},
 		Parameters: dashscope.VACEParameters{
-			ControlCondition: "posebodyface",
+			ControlCondition: dashscope.ControlConditionPoseBodyFace,
 			Strength:         &strength,
 		},
 	})
@@ -124,7 +124,7 @@ func ExampleClient_SubmitAndWaitImageToVideo_animateMove() {
 			VideoURL: "https://example.com/dance_ref.mp4",
 		},
 		Parameters: dashscope.AnimateParameters{
-			Mode: "wan-std",
+			Mode: dashscope.AnimateModeStd,
 		},
 	})
 	if err != nil {
