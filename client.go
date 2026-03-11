@@ -43,6 +43,7 @@ type Config struct {
 	BaseURL      string
 	Region       Region
 	HTTPClient   *http.Client
+	Headers      map[string]string // 自定义请求头，会附加到每个请求中
 	PollInterval time.Duration
 }
 
@@ -50,6 +51,7 @@ type Client struct {
 	apiKey       string
 	baseURL      string
 	httpClient   *http.Client
+	headers      map[string]string
 	pollInterval time.Duration
 }
 
@@ -80,6 +82,7 @@ func NewClient(cfg Config) (*Client, error) {
 		apiKey:       cfg.APIKey,
 		baseURL:      strings.TrimRight(baseURL, "/"),
 		httpClient:   httpClient,
+		headers:      cfg.Headers,
 		pollInterval: pollInterval,
 	}, nil
 }
@@ -144,6 +147,10 @@ func (c *Client) doJSON(
 		return fmt.Errorf("创建请求失败: %w", err)
 	}
 
+	// 自定义 headers 先设置，SDK 内部 headers 后设置以保证优先级
+	for k, v := range c.headers {
+		req.Header.Set(k, v)
+	}
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 	if requestBody != nil {
 		req.Header.Set("Content-Type", "application/json")
