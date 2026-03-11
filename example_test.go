@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/ai-web4/dashscope"
+	"github.com/ai-web4/dashscope-go"
 )
 
 // 首尾帧生视频
