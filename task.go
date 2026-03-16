@@ -15,7 +15,7 @@ func (c *Client) GetTask(ctx context.Context, taskID string) (*TaskResponse, err
 	}
 
 	var resp TaskResponse
-	if err := c.doJSON(ctx, http.MethodGet, "/api/v1/tasks/"+taskID, nil, &resp, false); err != nil {
+	if err := c.doJSON(ctx, http.MethodGet, "/tasks/"+taskID, nil, &resp, false, nil); err != nil {
 		return nil, err
 	}
 

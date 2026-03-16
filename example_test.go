@@ -1,23 +1,22 @@
 package dashscope_test
 
 import (
+	"candyhub/dashscope"
 	"context"
 	"fmt"
 	"log"
 	"time"
-
-	"github.com/ai-web4/dashscope-go"
 )
 
 // 首尾帧生视频
 func ExampleClient_SubmitAndWaitImageToVideo() {
 	client, _ := dashscope.NewClient(dashscope.Config{
-		APIKey: "sk-xxx",
-		Region: dashscope.RegionBeijing,
+		APIKey: "sk-806abe6f17354365b6bc4e4f6696962c",
+		Region: dashscope.RegionSingapore,
 	})
 
 	resp, err := client.SubmitAndWaitImageToVideo(context.Background(), dashscope.GenerationRequest{
-		Model: "wan2.2-kf2v-flash",
+		Model: dashscope.ModelWan22KF2VFlash,
 		Input: dashscope.FirstLastFrameInput{
 			Prompt:        "一只小猫从窗边跳到沙发上",
 			FirstFrameURL: "https://example.com/first.png",
@@ -41,7 +40,7 @@ func ExampleClient_SubmitAndWaitVideoGeneration_textToVideo() {
 	})
 
 	resp, err := client.SubmitAndWaitVideoGeneration(context.Background(), dashscope.GenerationRequest{
-		Model: "wan2.6-t2v",
+		Model: dashscope.ModelWan26T2V,
 		Input: dashscope.TextToVideoInput{
 			Prompt: "夕阳下，一只金毛犬在海滩上奔跑",
 		},
@@ -65,7 +64,7 @@ func ExampleClient_SubmitAndWaitVideoGeneration_referenceVideo() {
 	})
 
 	resp, err := client.SubmitAndWaitVideoGeneration(context.Background(), dashscope.GenerationRequest{
-		Model: "wan2.6-r2v-flash",
+		Model: dashscope.ModelWan26R2VFlash,
 		Input: dashscope.ReferenceVideoInput{
 			Prompt: "character1在沙发上开心地看电影",
 			ReferenceURLs: []string{
@@ -93,7 +92,7 @@ func ExampleClient_SubmitAndWaitVideoGeneration_vaceRepainting() {
 
 	strength := 0.8
 	resp, err := client.SubmitAndWaitVideoGeneration(context.Background(), dashscope.GenerationRequest{
-		Model: "wanx2.1-vace-plus",
+		Model: dashscope.ModelWanx21VACEPlus,
 		Input: dashscope.VACEInput{
 			Prompt:   "一位穿红色裙子的女孩在跳舞",
 			Function: dashscope.VACEFunctionVideoRepainting,
@@ -118,7 +117,7 @@ func ExampleClient_SubmitAndWaitImageToVideo_animateMove() {
 	})
 
 	resp, err := client.SubmitAndWaitImageToVideo(context.Background(), dashscope.GenerationRequest{
-		Model: "wan2.2-animate-move",
+		Model: dashscope.ModelWan22AnimateMove,
 		Input: dashscope.AnimateMoveInput{
 			ImageURL: "https://example.com/person.jpg",
 			VideoURL: "https://example.com/dance_ref.mp4",
@@ -144,7 +143,7 @@ func ExampleClient_CallSync_detect() {
 	err := client.CallSync(context.Background(),
 		"/api/v1/services/aigc/image2video/video-synthesis",
 		dashscope.DetectRequest{
-			Model: "emo-detect-v1",
+			Model: dashscope.ModelEMODetect,
 			Input: dashscope.DetectInput{
 				ImageURL: "https://example.com/portrait.jpg",
 			},
@@ -165,7 +164,7 @@ func ExampleClient_WaitTaskWithInterval() {
 	})
 
 	created, err := client.SubmitVideoGeneration(context.Background(), dashscope.GenerationRequest{
-		Model: "wan2.6-t2v",
+		Model: dashscope.ModelWan26T2V,
 		Input: dashscope.TextToVideoInput{
 			Prompt: "星空下的湖面倒映着月光",
 		},

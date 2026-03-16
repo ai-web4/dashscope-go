@@ -29,9 +29,9 @@ type Size string
 
 const (
 	// 480P 档位
-	Size480P_832x480 Size = "832*480"  // 16:9
-	Size480P_480x832 Size = "480*832"  // 9:16
-	Size480P_624x624 Size = "624*624"  // 1:1
+	Size480P_832x480 Size = "832*480" // 16:9
+	Size480P_480x832 Size = "480*832" // 9:16
+	Size480P_624x624 Size = "624*624" // 1:1
 	// 720P 档位
 	Size720P_1280x720 Size = "1280*720" // 16:9
 	Size720P_720x1280 Size = "720*1280" // 9:16
@@ -124,12 +124,72 @@ const (
 	DigitalHumanStyleSpeech DigitalHumanStyle = "speech" // 说话风格
 )
 
+// Model 模型名称
+type Model string
+
+const (
+	// 文生视频 (端点: video-generation)
+	ModelWan26T2V        Model = "wan2.6-t2v"
+	ModelWan26T2VUS      Model = "wan2.6-t2v-us"
+	ModelWan25T2VPreview Model = "wan2.5-t2v-preview"
+	ModelWan22T2VPlus    Model = "wan2.2-t2v-plus"
+	ModelWanx21T2VTurbo  Model = "wanx2.1-t2v-turbo"
+	ModelWanx21T2VPlus   Model = "wanx2.1-t2v-plus"
+
+	// 图生视频-首帧 (端点: video-generation)
+	ModelWan26I2VFlash   Model = "wan2.6-i2v-flash"
+	ModelWan26I2V        Model = "wan2.6-i2v"
+	ModelWan26I2VUS      Model = "wan2.6-i2v-us"
+	ModelWan25I2VPreview Model = "wan2.5-i2v-preview"
+	ModelWan22I2VPlus    Model = "wan2.2-i2v-plus"
+	ModelWan22I2VFlash   Model = "wan2.2-i2v-flash"
+	ModelWanx21I2VTurbo  Model = "wanx2.1-i2v-turbo"
+	ModelWanx21I2VPlus   Model = "wanx2.1-i2v-plus"
+
+	// 首尾帧生视频 (端点: image2video)
+	ModelWan22KF2VFlash Model = "wan2.2-kf2v-flash"
+	ModelWanx21KF2VPlus Model = "wanx2.1-kf2v-plus"
+
+	// 参考生视频 (端点: video-generation)
+	ModelWan26R2VFlash Model = "wan2.6-r2v-flash"
+	ModelWan26R2V      Model = "wan2.6-r2v"
+
+	// VACE 视频编辑 (端点: video-generation)
+	ModelWanx21VACEPlus Model = "wanx2.1-vace-plus"
+
+	// 图生动作 (端点: image2video)
+	ModelWan22AnimateMove Model = "wan2.2-animate-move"
+
+	// 视频换人 (端点: image2video)
+	ModelWan22AnimateMix Model = "wan2.2-animate-mix"
+
+	// 数字人 (端点: image2video)
+	ModelWan22S2V       Model = "wan2.2-s2v"
+	ModelWan22S2VDetect Model = "wan2.2-s2v-detect"
+
+	// 悦动人像 EMO
+	ModelEMODetect Model = "emo-detect-v1"
+	ModelEMO       Model = "emo-v1"
+
+	// 灵动人像 LivePortrait
+	ModelLivePortraitDetect Model = "liveportrait-detect"
+	ModelLivePortrait       Model = "liveportrait"
+
+	// 舞动人像 AnimateAnyone
+	ModelAnimateAnyoneDetect   Model = "animate-anyone-detect-gen2"
+	ModelAnimateAnyoneTemplate Model = "animate-anyone-template-gen2"
+	ModelAnimateAnyone         Model = "animate-anyone-gen2"
+
+	// 声动人像 VideoRetalk
+	ModelVideoRetalk Model = "videoretalk"
+)
+
 // -------- 通用请求 --------
 
 type GenerationRequest struct {
-	Model      string `json:"model"`
-	Input      any    `json:"input,omitempty"`
-	Parameters any    `json:"parameters,omitempty"`
+	Model      Model `json:"model"`
+	Input      any   `json:"input,omitempty"`
+	Parameters any   `json:"parameters,omitempty"`
 }
 
 // -------- Input 类型 --------
@@ -175,11 +235,11 @@ type ReferenceVideoInput struct {
 // 端点: video-generation
 // function 值: image_reference / video_repainting / video_edit / video_extension / video_outpainting
 type VACEInput struct {
-	Prompt       string   `json:"prompt,omitempty"`
+	Prompt       string       `json:"prompt,omitempty"`
 	Function     VACEFunction `json:"function,omitempty"`
-	RefImagesURL []string `json:"ref_images_url,omitempty"`
-	VideoURL     string   `json:"video_url,omitempty"`
-	ImageURL     string   `json:"image_url,omitempty"`
+	RefImagesURL []string     `json:"ref_images_url,omitempty"`
+	VideoURL     string       `json:"video_url,omitempty"`
+	ImageURL     string       `json:"image_url,omitempty"`
 	// video_edit
 	MaskImageURL string `json:"mask_image_url,omitempty"`
 	MaskVideoURL string `json:"mask_video_url,omitempty"`
@@ -267,7 +327,7 @@ type VACEParameters struct {
 
 // DetectRequest 图像检测请求（同步接口，无需异步头）
 type DetectRequest struct {
-	Model      string      `json:"model"`
+	Model      Model       `json:"model"`
 	Input      DetectInput `json:"input"`
 	Parameters any         `json:"parameters,omitempty"`
 }

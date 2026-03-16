@@ -87,24 +87,44 @@ func NewClient(cfg Config) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) SubmitVideoGeneration(ctx context.Context, req GenerationRequest) (*CreateTaskResponse, error) {
-	return c.submitTask(ctx, ServiceVideoGeneration, req)
+// SubmitAsync 提交异步任务到任意 DashScope API 路径（透传 raw JSON body）
+// 返回 CreateTaskResponse，需后续轮询获取结果
+func (c *Client) SubmitAsync(ctx context.Context, path string, body json.RawMessage, header ...map[string]string) (*CreateTaskResponse, error) {
+	var resp CreateTaskResponse
+	if err := c.doJSON(ctx, http.MethodPost, path, body, &resp, true, mergeHeaders(header)); err != nil {
+		return nil, err
+	}
+	return &resp, nil
 }
 
-func (c *Client) SubmitImageToVideo(ctx context.Context, req GenerationRequest) (*CreateTaskResponse, error) {
-	return c.submitTask(ctx, ServiceImageToVideo, req)
+// CallRaw 调用任意 DashScope API 路径（同步，透传 raw JSON body）
+// 返回原始 JSON 响应
+func (c *Client) CallRaw(ctx context.Context, path string, body json.RawMessage, header ...map[string]string) (json.RawMessage, error) {
+	var resp json.RawMessage
+	if err := c.doJSON(ctx, http.MethodPost, path, body, &resp, false, mergeHeaders(header)); err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
 
-func (c *Client) SubmitAndWaitVideoGeneration(ctx context.Context, req GenerationRequest) (*TaskResponse, error) {
-	created, err := c.SubmitVideoGeneration(ctx, req)
+func (c *Client) SubmitVideoGeneration(ctx context.Context, req GenerationRequest, header ...map[string]string) (*CreateTaskResponse, error) {
+	return c.submitTask(ctx, ServiceVideoGeneration, req, mergeHeaders(header))
+}
+
+func (c *Client) SubmitImageToVideo(ctx context.Context, req GenerationRequest, header ...map[string]string) (*CreateTaskResponse, error) {
+	return c.submitTask(ctx, ServiceImageToVideo, req, mergeHeaders(header))
+}
+
+func (c *Client) SubmitAndWaitVideoGeneration(ctx context.Context, req GenerationRequest, header ...map[string]string) (*TaskResponse, error) {
+	created, err := c.SubmitVideoGeneration(ctx, req, mergeHeaders(header))
 	if err != nil {
 		return nil, err
 	}
 	return c.WaitTask(ctx, created.Output.TaskID)
 }
 
-func (c *Client) SubmitAndWaitImageToVideo(ctx context.Context, req GenerationRequest) (*TaskResponse, error) {
-	created, err := c.SubmitImageToVideo(ctx, req)
+func (c *Client) SubmitAndWaitImageToVideo(ctx context.Context, req GenerationRequest, header ...map[string]string) (*TaskResponse, error) {
+	created, err := c.SubmitImageToVideo(ctx, req, mergeHeaders(header))
 	if err != nil {
 		return nil, err
 	}
@@ -114,15 +134,23 @@ func (c *Client) SubmitAndWaitImageToVideo(ctx context.Context, req GenerationRe
 // CallSync 发起同步 POST 请求（用于 detect 等同步接口）。
 // path 为完整 API 路径，如 "/api/v1/services/aigc/image2video/video-synthesis"。
 func (c *Client) CallSync(ctx context.Context, path string, reqBody any, respBody any) error {
-	return c.doJSON(ctx, http.MethodPost, path, reqBody, respBody, false)
+	return c.doJSON(ctx, http.MethodPost, path, reqBody, respBody, false, nil)
 }
 
-func (c *Client) submitTask(ctx context.Context, service Service, reqBody GenerationRequest) (*CreateTaskResponse, error) {
+func (c *Client) submitTask(ctx context.Context, service Service, reqBody GenerationRequest, header map[string]string) (*CreateTaskResponse, error) {
 	var resp CreateTaskResponse
-	if err := c.doJSON(ctx, http.MethodPost, service.Path(), reqBody, &resp, true); err != nil {
+	if err := c.doJSON(ctx, http.MethodPost, service.Path(), reqBody, &resp, true, header); err != nil {
 		return nil, err
 	}
 	return &resp, nil
+}
+
+// mergeHeaders 取 variadic header 参数的第一个值（用于可选参数模式）
+func mergeHeaders(headers []map[string]string) map[string]string {
+	if len(headers) > 0 {
+		return headers[0]
+	}
+	return nil
 }
 
 func (c *Client) doJSON(
@@ -132,6 +160,7 @@ func (c *Client) doJSON(
 	requestBody any,
 	responseBody any,
 	async bool,
+	header map[string]string,
 ) error {
 	var reader io.Reader
 	if requestBody != nil {
@@ -142,13 +171,17 @@ func (c *Client) doJSON(
 		reader = bytes.NewReader(data)
 	}
 
+	fmt.Println("doJSON", c.baseURL+path, requestBody)
 	req, err := http.NewRequestWithContext(ctx, method, c.baseURL+path, reader)
 	if err != nil {
 		return fmt.Errorf("创建请求失败: %w", err)
 	}
 
-	// 自定义 headers 先设置，SDK 内部 headers 后设置以保证优先级
+	// 优先级：调用方 header > 全局 c.headers > SDK 内部 header
 	for k, v := range c.headers {
+		req.Header.Set(k, v)
+	}
+	for k, v := range header {
 		req.Header.Set(k, v)
 	}
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
