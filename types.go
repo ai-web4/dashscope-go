@@ -2,7 +2,7 @@ package dashscope
 
 import "encoding/json"
 
-// -------- 服务端点 --------
+// -------- 服务端点  --------
 
 type Service string
 
